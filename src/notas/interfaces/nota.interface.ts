@@ -1,3 +1,5 @@
+import { Document } from 'mongoose';
+
 export interface INota {
   _id?: string;
   alunoId: string;
@@ -9,6 +11,7 @@ export interface INota {
 
 export interface INotaResponse extends INota {
   _id: string;
+  
 }
 
 export interface IMediaResponse {

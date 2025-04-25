@@ -32,6 +32,8 @@
     "axios": "^1.9.0",
     "cache-manager-redis-store": "^3.0.1",
     "class-validator": "^0.14.1",
+    "compression": "^1.8.0",
+    "helmet": "^8.1.0",
     "mongoose": "^8.13.3",
     "opossum": "^5.0.1",
     "redis": "^4.7.0",
