@@ -86,10 +86,13 @@ export class NotasService {
       await this.cacheService.invalidateStudentCache(createNotaDto.alunoId);
       await this.cacheService.invalidateContentCache(createNotaDto.conteudoId);
   
-      // Armazenar a nova nota em cache
-      await this.cacheService.setGrade(notaSalva._id.toString(), notaSalva);
+      // Converter para o formato esperado
+      const notaResponse = this.toINotaResponse(notaSalva);
   
-      return notaSalva;
+      // Armazenar a nova nota em cache
+      await this.cacheService.setGrade(notaResponse._id, notaResponse);
+  
+      return notaResponse;
     }
   
     async findAll(findNotasDto: FindNotasDto): Promise<INotaResponse[]> {
@@ -108,7 +111,7 @@ export class NotasService {
               return grade || this.findOne(id);
             })
           );
-          return cachedGrades.filter(Boolean);
+          return cachedGrades.filter(Boolean).map(this.toINotaResponse);
         }
       }
   
@@ -124,7 +127,7 @@ export class NotasService {
               return grade || this.findOne(id);
             })
           );
-          return cachedGrades.filter(Boolean);
+          return cachedGrades.filter(Boolean).map(this.toINotaResponse);
         }
       }
   
@@ -133,40 +136,40 @@ export class NotasService {
   
       // Armazenar em cache
       if (alunoId && notas.length > 0) {
-        const gradeIds = notas.map(nota => nota._id.toString());
+        const gradeIds = notas.map((nota: NotaDocument) => (nota._id as Types.ObjectId).toString());
         await this.cacheService.setStudentGrades(alunoId, gradeIds);
         
         // Armazenar cada nota individualmente
         for (const nota of notas) {
-          await this.cacheService.setGrade(nota._id.toString(), nota);
+          await this.cacheService.setGrade((nota._id as Types.ObjectId).toString(), nota);
         }
       }
   
       if (conteudoId && notas.length > 0) {
-        const gradeIds = notas.map(nota => nota._id.toString());
+        const gradeIds = notas.map(nota => (nota._id as Types.ObjectId).toString());
         await this.cacheService.setContentGrades(conteudoId, gradeIds);
       }
   
-      return notas;
+      return notas.map(this.toINotaResponse);
     }
   
-    private toINotaResponse(notaDoc: NotaDocument & { _id: Types.ObjectId }): INotaResponse {
-        return {
-          _id: notaDoc._id.toString(),
-          alunoId: notaDoc.alunoId,
-          conteudoId: notaDoc.conteudoId,
-          valor: notaDoc.valor,
-          observacao: notaDoc.observacao,
-          dataRegistro: notaDoc.dataRegistro
-        };
-      }
+    async findOne(id: string): Promise<INotaResponse> {
+        // Verificar cache
+        const cachedGrade = await this.cacheService.getGrade(id);
+        if (cachedGrade) {
+          return this.toINotaResponse(cachedGrade);
+        }
     
-      async findOne(id: string): Promise<INotaResponse> {
+        // Se não encontrou em cache, buscar no banco de dados
         const nota = await this.notaModel.findById(id).exec();
         if (!nota) {
           throw new HttpException('Nota não encontrada', HttpStatus.NOT_FOUND);
         }
-        return this.toINotaResponse(nota as NotaDocument & { _id: Types.ObjectId });
+    
+        // Armazenar em cache
+        await this.cacheService.setGrade(id, nota);
+    
+        return this.toINotaResponse(nota);
       }
   
     async update(id: string, updateNotaDto: UpdateNotaDto): Promise<INotaResponse> {
@@ -181,6 +184,11 @@ export class NotasService {
         { $set: updateNotaDto },
         { new: true },
       ).exec();
+      
+      // Verificar se a nota foi atualizada com sucesso
+      if (!notaAtualizada) {
+        throw new HttpException('Falha ao atualizar nota', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
   
       // Invalidar caches relacionados
       await this.cacheService.invalidateGrade(id);
@@ -190,7 +198,7 @@ export class NotasService {
       // Atualizar cache da nota
       await this.cacheService.setGrade(id, notaAtualizada);
   
-      return notaAtualizada;
+      return this.toINotaResponse(notaAtualizada);
     }
   
     async remove(id: string): Promise<void> {
@@ -268,6 +276,17 @@ export class NotasService {
         totalNotas: notas.length,
         alunoId,
         conteudoId,
+      };
+    }
+
+    private toINotaResponse(nota: NotaDocument): INotaResponse {
+      return {
+        _id: (nota._id as Types.ObjectId).toString(),
+        alunoId: nota.alunoId,
+        conteudoId: nota.conteudoId,
+        valor: nota.valor,
+        dataRegistro : nota.dataRegistro,
+        // Inclua outros campos conforme necessário
       };
     }
     

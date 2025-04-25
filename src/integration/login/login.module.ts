@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { CacheModule } from '../../cache/cache.module';
+import { CircuitBreakerModule } from '../circuit-breaker/circuit-breaker.module';
+import { RetryModule } from '../retry/retry.module';
 import { LoginService } from './login.service';
 
 @Module({
@@ -12,8 +14,10 @@ import { LoginService } from './login.service';
     }),
     ConfigModule,
     CacheModule,
+    CircuitBreakerModule,
+    RetryModule,
   ],
   providers: [LoginService],
-  exports: [LoginService],
+  exports: [LoginService]
 })
 export class LoginModule {}
