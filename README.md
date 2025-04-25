@@ -1,40 +1,4 @@
-# Microsservice Notas API
 
-Uma API para gerenciamento de notas acadêmicas, construída como um microsserviço utilizando NestJS.
-
-## Visão Geral
-
-Este microsserviço gerencia notas de alunos, oferecendo operações CRUD com recursos avançados de resiliência, incluindo:
-
-- Cache com Redis
-- Circuit Breaker para lidar com falhas em serviços externos
-- Retry com backoff exponencial
-- Documentação automática com Swagger
-
-## Tecnologias Utilizadas
-
-- NestJS
-- MongoDB (via Mongoose)
-- Redis (cache)
-- Docker & Docker Compose
-- TypeScript
-
-## Pré-requisitos
-
-- Node.js (v14+)
-- Docker e Docker Compose
-- MongoDB (ou container Docker)
-- Redis (ou container Docker)
-
-## Instalação
-
-```bash
-# Clonar o repositório
-git clone <url-do-repositório>
-cd microsservice-notas-api
-
-# Instalar dependências
-npm install
 
 ```markdown
 # Microsservice Notas API
