@@ -1,6 +1,3 @@
-
-
-```markdown
 # Microsservice Notas API
 
 Uma API para gerenciamento de notas acadêmicas, construída como um microsserviço utilizando NestJS.
