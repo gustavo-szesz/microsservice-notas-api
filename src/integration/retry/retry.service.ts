@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { retry } from 'rxjs/operators';
+import { delay, last, retry } from 'rxjs/operators';
 import { Observable, throwError, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
@@ -41,6 +41,7 @@ export class RetryService {
                     this.logger.warn(`Retry attempt ${retryAttempt} in ${delay}ms failed.
                         Retrying in ${delay}ms...`, error);
 
+                    // Retorna um timer com o delay calculado
                     return timer(delay);
                 }),
                 
@@ -48,4 +49,46 @@ export class RetryService {
 
         }
     }
+
+    /**
+   * Executa uma função com retry e backoff exponencial
+   * @param fn Função a ser executada
+   * @param serviceName Nome do serviço para logging
+   * @param maxRetries Número máximo de tentativas
+   */
+    async executeWithRetry(
+        fn: () => Promise<any>,
+        serviceName: string,
+        maxRetries = 3,
+    ): Promise<any> { 
+        let attempts = 0;
+        let lastError: any;
+
+        while (attempts < maxRetries) {
+            try {
+                return await fn();
+            } catch (error) {
+                attempts++;
+                lastError = error;
+                
+            
+            if (attempts >= maxRetries) {
+                this.logger.error(`All retys ${maxRetries} failed for ${serviceName}`);
+                break;
+            }
+
+            const delay = Math.min(
+                10000, // 10 seconds, max delay
+                1000 * Math.pow(2, attempts - 1) // Exponential backoff
+            );
+
+            this.logger.warn(`Retry attempt ${attempts} failed for ${serviceName}. 
+                Retrying in ${delay}ms...`);
+            
+            await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+        throw lastError;
+    }    
+
 }
