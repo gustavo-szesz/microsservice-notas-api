@@ -1,13 +1,13 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Schema as MongoseSchema } from "mongoose";
 
-export type NotasDocument = Notas & Document;
+export type NotaDocument = Nota & Document;
 
 @Schema({
     timestamps: true,
     collection: 'notas',
 })
-export class Notas {
+export class Nota {
     @Prop({ required: true })
     alunoId: string;
 
@@ -24,7 +24,7 @@ export class Notas {
     dataRegistro: Date;
 }
 
-export const NotasSchema = SchemaFactory.createForClass(Notas);
+export const NotasSchema = SchemaFactory.createForClass(Nota);
 
 // Indices para o aluno e conteudo, 
 // sem duplicidade

@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Mongoose } from 'mongoose';
 import { MongooseModule } from '@nestjs/mongoose';
 import { IntegrationModule } from './integration/integration.module';
+import { ConteudoModule } from './conteudo/conteudo.module';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { IntegrationModule } from './integration/integration.module';
         useUnifiedTopology: true,
     }),
     }),
-    NotasModule, CacheModule, IntegrationModule],
+    NotasModule, CacheModule, IntegrationModule, ConteudoModule],
   controllers: [AppController],
   providers: [AppService],
 })
